@@ -95,6 +95,16 @@
             border: none !important;
         }
 
+        /* Map credits: required by the tile providers, kept small and subtle */
+        .leaflet-container .leaflet-control-attribution {
+            background: transparent;
+            color: rgba(255,255,255,0.35);
+            font-size: 9px;
+        }
+        .leaflet-container .leaflet-control-attribution a {
+            color: rgba(255,255,255,0.45);
+        }
+
         @media (max-width: 600px) {
             .brand-overlay { top: 20px; left: 20px; }
             h1 { font-size: 1.4rem; }
@@ -118,6 +128,10 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <script>
+        // CARTO basemaps now require a free API key (get one at https://carto.com/basemaps/apikey).
+        // Paste it here. While it is empty, the map uses Esri's dark gray basemap, which needs no key.
+        const CARTO_API_KEY = '';
+
         if (typeof L === 'undefined') {
             alert("Error: The map library could not load. Please check your internet connection.");
         } else {
@@ -126,10 +140,20 @@
                 attributionControl: false
             });
 
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                subdomains: 'abcd'
-            }).addTo(map);
+            L.control.attribution({ position: 'bottomleft', prefix: false }).addTo(map);
+
+            if (CARTO_API_KEY) {
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=' + encodeURIComponent(CARTO_API_KEY), {
+                    maxZoom: 19,
+                    subdomains: 'abcd',
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                }).addTo(map);
+            } else {
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+                    maxZoom: 16,
+                    attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors'
+                }).addTo(map);
+            }
 
             const cities = [
                 // Alignment fix for Hammarstrand is preserved here: align: "left"
